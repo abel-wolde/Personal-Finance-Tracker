@@ -1,37 +1,50 @@
-# Personal Finance Tracker
+# Personal Finance Tracker — Upgraded
 
+C++17 console app by Abel Wolde. Tracks expenses against a monthly budget:
+expense logging, monthly budgets, spending summaries, sorting, and category
+search. Upgraded from the original single-file `main.cpp`
+([abel-wolde/Personal-Finance-Tracker](https://github.com/abel-wolde/Personal-Finance-Tracker)).
 
-A simple, lightweight C++ console application designed to log daily expenses, track monthly budgets, and display summary reports.
+## What changed in this upgrade
 
+- **SQLite persistence** — transactions and the monthly budget are stored in
+  `finance.db`, so data survives between runs. The original kept everything
+  in memory and lost it on exit.
+- **Split into modules** — `src/transaction.h` (data model),
+  `src/finance_tracker.h/.cpp` (tracker logic), `src/storage.h/.cpp`
+  (SQLite layer), `src/main.cpp` (interactive CLI).
+- **New features** — sort by date / amount / category, search by category,
+  monthly totals (`totalForMonth("2026-09")`), per-category totals.
+- **Unit tests** — `tests/test_finance_tracker.cpp`, 27 checks, no external
+  framework.
+- **Interactive CLI** — the original `main()` only ran a fixed demo with
+  three hard-coded transactions. The demo data is NOT seeded into the app;
+  it lives on as test data only. The app now starts with an empty database.
 
-## Features
-- **Transaction Logging:** Record expenses with date, category, description, and amount.
-- **Budget Monitoring:** Set a custom monthly budget target and track total spending against it.
-- **Visual Reports:** Display itemized spending logs and remaining budget balance.
+## Build & test
 
+Requires g++ (C++17) and SQLite dev headers (`libsqlite3-dev` on Ubuntu).
 
-## Tech Stack
-- **Language:** C++17
-- **Compiler:** g++ / Clang / Visual Studio MSVC
-
-
-## Quickstart & Build Instructions
-
-
-### Prerequisites
-Make sure you have a C++ compiler (`g++`) installed.
-
-
-### Build & Run (Terminal / CLI)
 ```bash
-# Clone the repository
-git clone [https://github.com/THefisrt-tech/Personal-Finance-Tracker.git](https://github.com/THefisrt-tech/Personal-Finance-Tracker.git)
-cd Personal-Finance-Tracker
+make           # builds ./finance_tracker
+make test      # builds and runs the tests (27 checks, 0 failures)
+./finance_tracker   # interactive menu; data saved to finance.db
+make clean
+```
 
+## Schema
 
-# Compile the project
-g++ -std=c++17 main.cpp -o FinanceTracker
+```sql
+CREATE TABLE transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT, category TEXT, description TEXT, amount REAL);
+CREATE TABLE settings (key TEXT PRIMARY KEY, value REAL); -- monthly_budget
+```
 
+## What's missing before pushing to GitHub
 
-# Run the executable
-./FinanceTracker
+- Push these files into the existing `Personal-Finance-Tracker` repo
+  (replace `main.cpp` with this layout, or add it alongside and update the
+  repo README). The original `main.cpp` is preserved in git history.
+- Not yet built: CSV export/import, deleting or editing a transaction,
+  multi-month budget tracking.
